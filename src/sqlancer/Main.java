@@ -31,6 +31,7 @@ import sqlancer.duckdb.DuckDBProvider;
 import sqlancer.h2.H2Provider;
 import sqlancer.mariadb.MariaDBProvider;
 import sqlancer.mysql.MySQLProvider;
+import sqlancer.noisepage.NoisePageProvider;
 import sqlancer.postgres.PostgresProvider;
 import sqlancer.sqlite3.SQLite3Provider;
 import sqlancer.tidb.TiDBProvider;
@@ -554,6 +555,7 @@ public final class Main {
         providers.add(new ClickHouseProvider());
         providers.add(new DuckDBProvider());
         providers.add(new H2Provider());
+        providers.add(new NoisePageProvider());
         return providers;
     }
 

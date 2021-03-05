@@ -9,7 +9,8 @@ public abstract class AbstractInsertGenerator<C> {
     protected StringBuilder sb = new StringBuilder();
 
     protected void insertColumns(List<C> columns) {
-        for (int nrRows = 0; nrRows < Randomly.smallNumber() + 1; nrRows++) {
+//        for (int nrRows = 0; nrRows < Randomly.smallNumber() + 1; nrRows++) {
+        for (int nrRows = 0; nrRows < 1; nrRows++) {
             if (nrRows != 0) {
                 sb.append(", ");
             }

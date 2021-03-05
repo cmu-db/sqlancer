@@ -33,7 +33,7 @@ public class NoisePageProvider extends SQLProviderAdapter<NoisePageGlobalState, 
     public enum Action implements AbstractAction<NoisePageGlobalState> {
 
         INSERT(NoisePageInsertGenerator::getQuery), //
-        CREATE_INDEX(NoisePageIndexGenerator::getQuery), //
+//        CREATE_INDEX(NoisePageIndexGenerator::getQuery), //
 //        VACUUM((g) -> new SQLQueryAdapter("VACUUM;")), //
 //        ANALYZE((g) -> new SQLQueryAdapter("ANALYZE;")), //
         DELETE(NoisePageDeleteGenerator::getQuery), //
@@ -66,10 +66,10 @@ public class NoisePageProvider extends SQLProviderAdapter<NoisePageGlobalState, 
         switch (a) {
         case INSERT:
             return r.getInteger(0, globalState.getOptions().getMaxNumberInserts());
-        case CREATE_INDEX:
-            if (!globalState.getDmbsSpecificOptions().testIndexes) {
-                return 0;
-            }
+//        case CREATE_INDEX:
+//            if (!globalState.getDmbsSpecificOptions().testIndexes) {
+//                return 0;
+//            }
             // fall through
         case UPDATE:
             return r.getInteger(0, globalState.getDmbsSpecificOptions().maxNumUpdates + 1);
