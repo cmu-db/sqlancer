@@ -9,15 +9,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.IgnoreMeException;
-import sqlancer.NoRECBase;
-import sqlancer.Query;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.TestOracle;
-import sqlancer.ast.newast.ColumnReferenceNode;
-import sqlancer.ast.newast.NewPostfixTextNode;
-import sqlancer.ast.newast.Node;
-import sqlancer.ast.newast.TableReferenceNode;
+import sqlancer.SQLConnection;
+import sqlancer.common.ast.newast.ColumnReferenceNode;
+import sqlancer.common.ast.newast.NewPostfixTextNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.ast.newast.TableReferenceNode;
+import sqlancer.common.oracle.NoRECBase;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
+
 import sqlancer.noisepage.NoisePageErrors;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
 import sqlancer.noisepage.NoisePageSchema;
@@ -28,6 +30,7 @@ import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTables;
 import sqlancer.noisepage.NoisePageToStringVisitor;
 import sqlancer.noisepage.ast.NoisePageExpression;
+//import sqlancer.noisepage.ast.NoisePageJoin;
 import sqlancer.noisepage.ast.NoisePageJoin;
 import sqlancer.noisepage.ast.NoisePageSelect;
 import sqlancer.noisepage.gen.NoisePageExpressionGenerator;
@@ -52,17 +55,17 @@ public class NoisePageNoRECOracle extends NoRECBase<NoisePageGlobalState> implem
         List<NoisePageTable> tables = randomTables.getTables();
         List<TableReferenceNode<NoisePageExpression, NoisePageTable>> tableList = tables.stream()
                 .map(t -> new TableReferenceNode<NoisePageExpression, NoisePageTable>(t)).collect(Collectors.toList());
-        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, state);
-        int secondCount = getSecondQuery(tableList.stream().collect(Collectors.toList()), randomWhereCondition, joins);
-        int firstCount = getFirstQueryCount(con, tableList.stream().collect(Collectors.toList()), columns,
-                randomWhereCondition, joins);
-        if (firstCount == -1 || secondCount == -1) {
-            throw new IgnoreMeException();
-        }
-        if (firstCount != secondCount) {
-            throw new AssertionError(
-                    optimizedQueryString + "; -- " + firstCount + "\n" + unoptimizedQueryString + " -- " + secondCount);
-        }
+//        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, state);
+//        int secondCount = getSecondQuery(tableList.stream().collect(Collectors.toList()), randomWhereCondition, joins);
+//        int firstCount = getFirstQueryCount(con, tableList.stream().collect(Collectors.toList()), columns,
+//                randomWhereCondition, joins);
+//        if (firstCount == -1 || secondCount == -1) {
+//            throw new IgnoreMeException();
+//        }
+//        if (firstCount != secondCount) {
+//            throw new AssertionError(
+//                    optimizedQueryString + "; -- " + firstCount + "\n" + unoptimizedQueryString + " -- " + secondCount);
+//        }
     }
 
     private int getSecondQuery(List<Node<NoisePageExpression>> tableList, Node<NoisePageExpression> randomWhereCondition,
@@ -82,8 +85,8 @@ public class NoisePageNoRECOracle extends NoRECBase<NoisePageGlobalState> implem
         int secondCount = 0;
         unoptimizedQueryString = "SELECT SUM(count) FROM (" + NoisePageToStringVisitor.asString(select) + ") as res";
         errors.add("canceling statement due to statement timeout");
-        Query q = new QueryAdapter(unoptimizedQueryString, errors);
-        ResultSet rs;
+        SQLQueryAdapter q = new SQLQueryAdapter(unoptimizedQueryString, errors);
+        SQLancerResultSet rs;
         try {
             rs = q.executeAndGetLogged(state);
         } catch (Exception e) {

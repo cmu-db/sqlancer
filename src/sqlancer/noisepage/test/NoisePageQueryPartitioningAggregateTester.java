@@ -1,6 +1,5 @@
 package sqlancer.noisepage.test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,15 +7,16 @@ import java.util.List;
 
 import sqlancer.ComparatorHelper;
 import sqlancer.IgnoreMeException;
-import sqlancer.QueryAdapter;
 import sqlancer.Randomly;
-import sqlancer.TestOracle;
-import sqlancer.ast.newast.NewAliasNode;
-import sqlancer.ast.newast.NewBinaryOperatorNode;
-import sqlancer.ast.newast.NewFunctionNode;
-import sqlancer.ast.newast.NewUnaryPostfixOperatorNode;
-import sqlancer.ast.newast.NewUnaryPrefixOperatorNode;
-import sqlancer.ast.newast.Node;
+import sqlancer.common.ast.newast.NewAliasNode;
+import sqlancer.common.ast.newast.NewBinaryOperatorNode;
+import sqlancer.common.ast.newast.NewFunctionNode;
+import sqlancer.common.ast.newast.NewUnaryPostfixOperatorNode;
+import sqlancer.common.ast.newast.NewUnaryPrefixOperatorNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.oracle.TestOracle;
+import sqlancer.common.query.SQLQueryAdapter;
+import sqlancer.common.query.SQLancerResultSet;
 import sqlancer.noisepage.NoisePageErrors;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
 import sqlancer.noisepage.NoisePageSchema.NoisePageCompositeDataType;
@@ -64,8 +64,10 @@ public class NoisePageQueryPartitioningAggregateTester extends NoisePageQueryPar
         metamorphicQuery = createMetamorphicUnionQuery(select, aggregate, select.getFromList());
         secondResult = getAggregateResult(metamorphicQuery);
 
-        state.getState().queryString = "--" + originalQuery + ";\n--" + metamorphicQuery + "\n-- " + firstResult
-                + "\n-- " + secondResult;
+        state.getState().getLocalState().log(
+                "--" + originalQuery + ";\n--" + metamorphicQuery + "\n-- " + firstResult + "\n-- " + secondResult);
+//        state.getState().queryString = "--" + originalQuery + ";\n--" + metamorphicQuery + "\n-- " + firstResult
+//                + "\n-- " + secondResult;
         if (firstResult == null && secondResult != null
                 || firstResult != null && (!firstResult.contentEquals(secondResult)
                         && !ComparatorHelper.isEqualDouble(firstResult, secondResult))) {
@@ -99,8 +101,8 @@ public class NoisePageQueryPartitioningAggregateTester extends NoisePageQueryPar
 
     private String getAggregateResult(String queryString) throws SQLException {
         String resultString;
-        QueryAdapter q = new QueryAdapter(queryString, errors);
-        try (ResultSet result = q.executeAndGet(state)) {
+        SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors);
+        try (SQLancerResultSet result = q.executeAndGet(state)) {
             if (result == null) {
                 throw new IgnoreMeException();
             }
@@ -133,18 +135,18 @@ public class NoisePageQueryPartitioningAggregateTester extends NoisePageQueryPar
             count = new NoisePageCastOperation(new NewFunctionNode<>(aggregate.getArgs(), NoisePageAggregateFunction.COUNT),
                     new NoisePageCompositeDataType(NoisePageDataType.FLOAT, 8));
             return aliasArgs(Arrays.asList(sum, count));
-        case STDDEV_POP:
-            NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction> sumSquared = new NewFunctionNode<>(
-                    Arrays.asList(new NewBinaryOperatorNode<>(aggregate.getArgs().get(0), aggregate.getArgs().get(0),
-                            NoisePageBinaryArithmeticOperator.MULT)),
-                    NoisePageAggregateFunction.SUM);
-            count = new NoisePageCastOperation(
-                    new NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction>(aggregate.getArgs(),
-                            NoisePageAggregateFunction.COUNT),
-                    new NoisePageCompositeDataType(NoisePageDataType.FLOAT, 8));
-            NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction> avg = new NewFunctionNode<>(aggregate.getArgs(),
-                    NoisePageAggregateFunction.AVG);
-            return aliasArgs(Arrays.asList(sumSquared, count, avg));
+//        case STDDEV_POP:
+//            NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction> sumSquared = new NewFunctionNode<>(
+//                    Arrays.asList(new NewBinaryOperatorNode<>(aggregate.getArgs().get(0), aggregate.getArgs().get(0),
+//                            NoisePageBinaryArithmeticOperator.MULT)),
+//                    NoisePageAggregateFunction.SUM);
+//            count = new NoisePageCastOperation(
+//                    new NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction>(aggregate.getArgs(),
+//                            NoisePageAggregateFunction.COUNT),
+//                    new NoisePageCompositeDataType(NoisePageDataType.FLOAT, 8));
+//            NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction> avg = new NewFunctionNode<>(aggregate.getArgs(),
+//                    NoisePageAggregateFunction.AVG);
+//            return aliasArgs(Arrays.asList(sumSquared, count, avg));
         default:
             throw new AssertionError(aggregate.getFunc());
         }
@@ -161,8 +163,8 @@ public class NoisePageQueryPartitioningAggregateTester extends NoisePageQueryPar
 
     private String getOuterAggregateFunction(NewFunctionNode<NoisePageExpression, NoisePageAggregateFunction> aggregate) {
         switch (aggregate.getFunc()) {
-        case STDDEV_POP:
-            return "sqrt(SUM(agg0)/SUM(agg1)-SUM(agg2)*SUM(agg2))";
+//        case STDDEV_POP:
+//            return "sqrt(SUM(agg0)/SUM(agg1)-SUM(agg2)*SUM(agg2))";
         case AVG:
             return "SUM(agg0::FLOAT)/SUM(agg1)::FLOAT";
         case COUNT:

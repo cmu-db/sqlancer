@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sqlancer.Randomly;
-import sqlancer.ast.newast.Node;
-import sqlancer.ast.newast.TableReferenceNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.ast.newast.TableReferenceNode;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
 import sqlancer.noisepage.NoisePageSchema.NoisePageColumn;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
@@ -20,7 +20,8 @@ public class NoisePageJoin implements Node<NoisePageExpression> {
     private OuterType outerType;
 
     public enum JoinType {
-        INNER, NATURAL, LEFT, RIGHT;
+//        NATURAL, RIGHT,
+        INNER, LEFT;
 
         public static JoinType getRandom() {
             return Randomly.fromOptions(values());
@@ -28,7 +29,8 @@ public class NoisePageJoin implements Node<NoisePageExpression> {
     }
 
     public enum OuterType {
-        FULL, LEFT, RIGHT;
+//        FULL, LEFT, RIGHT;
+        LEFT;
 
         public static OuterType getRandom() {
             return Randomly.fromOptions(values());
@@ -81,17 +83,17 @@ public class NoisePageJoin implements Node<NoisePageExpression> {
             case INNER:
                 joinExpressions.add(NoisePageJoin.createInnerJoin(leftTable, rightTable, joinGen.generateExpression()));
                 break;
-            case NATURAL:
-                joinExpressions.add(NoisePageJoin.createNaturalJoin(leftTable, rightTable, OuterType.getRandom()));
-                break;
+//            case NATURAL:
+//                joinExpressions.add(NoisePageJoin.createNaturalJoin(leftTable, rightTable, OuterType.getRandom()));
+//                break;
             case LEFT:
                 joinExpressions
                         .add(NoisePageJoin.createLeftOuterJoin(leftTable, rightTable, joinGen.generateExpression()));
                 break;
-            case RIGHT:
-                joinExpressions
-                        .add(NoisePageJoin.createRightOuterJoin(leftTable, rightTable, joinGen.generateExpression()));
-                break;
+//            case RIGHT:
+//                joinExpressions
+//                        .add(NoisePageJoin.createRightOuterJoin(leftTable, rightTable, joinGen.generateExpression()));
+//                break;
             default:
                 throw new AssertionError();
             }
@@ -99,10 +101,10 @@ public class NoisePageJoin implements Node<NoisePageExpression> {
         return joinExpressions;
     }
 
-    public static NoisePageJoin createRightOuterJoin(TableReferenceNode<NoisePageExpression, NoisePageTable> left,
-            TableReferenceNode<NoisePageExpression, NoisePageTable> right, Node<NoisePageExpression> predicate) {
-        return new NoisePageJoin(left, right, JoinType.RIGHT, predicate);
-    }
+//    public static NoisePageJoin createRightOuterJoin(TableReferenceNode<NoisePageExpression, NoisePageTable> left,
+//            TableReferenceNode<NoisePageExpression, NoisePageTable> right, Node<NoisePageExpression> predicate) {
+//        return new NoisePageJoin(left, right, JoinType.RIGHT, predicate);
+//    }
 
     public static NoisePageJoin createLeftOuterJoin(TableReferenceNode<NoisePageExpression, NoisePageTable> left,
             TableReferenceNode<NoisePageExpression, NoisePageTable> right, Node<NoisePageExpression> predicate) {
@@ -114,11 +116,11 @@ public class NoisePageJoin implements Node<NoisePageExpression> {
         return new NoisePageJoin(left, right, JoinType.INNER, predicate);
     }
 
-    public static Node<NoisePageExpression> createNaturalJoin(TableReferenceNode<NoisePageExpression, NoisePageTable> left,
-            TableReferenceNode<NoisePageExpression, NoisePageTable> right, OuterType naturalJoinType) {
-        NoisePageJoin join = new NoisePageJoin(left, right, JoinType.NATURAL, null);
-        join.setOuterType(naturalJoinType);
-        return join;
-    }
+//    public static Node<NoisePageExpression> createNaturalJoin(TableReferenceNode<NoisePageExpression, NoisePageTable> left,
+//            TableReferenceNode<NoisePageExpression, NoisePageTable> right, OuterType naturalJoinType) {
+//        NoisePageJoin join = new NoisePageJoin(left, right, JoinType.NATURAL, null);
+//        join.setOuterType(naturalJoinType);
+//        return join;
+//    }
 
 }

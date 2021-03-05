@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.ast.newast.Node;
-import sqlancer.ast.newast.TableReferenceNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.ast.newast.TableReferenceNode;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTables;
 import sqlancer.noisepage.ast.NoisePageConstant;
 import sqlancer.noisepage.ast.NoisePageExpression;
-import sqlancer.noisepage.ast.NoisePageJoin;
+//import sqlancer.noisepage.ast.NoisePageJoin;
 import sqlancer.noisepage.ast.NoisePageSelect;
 
 public final class NoisePageRandomQuerySynthesizer {
@@ -41,8 +41,8 @@ public final class NoisePageRandomQuerySynthesizer {
         List<NoisePageTable> tables = targetTables.getTables();
         List<TableReferenceNode<NoisePageExpression, NoisePageTable>> tableList = tables.stream()
                 .map(t -> new TableReferenceNode<NoisePageExpression, NoisePageTable>(t)).collect(Collectors.toList());
-        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, globalState);
-        select.setJoinList(joins.stream().collect(Collectors.toList()));
+//        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, globalState);
+//        select.setJoinList(joins.stream().collect(Collectors.toList()));
         select.setFromList(tableList.stream().collect(Collectors.toList()));
         if (Randomly.getBoolean()) {
             select.setWhereClause(gen.generateExpression());

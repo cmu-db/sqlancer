@@ -1,10 +1,10 @@
 package sqlancer.noisepage;
 
-import sqlancer.ast.newast.NewToStringVisitor;
-import sqlancer.ast.newast.Node;
+import sqlancer.common.ast.newast.NewToStringVisitor;
+import sqlancer.common.ast.newast.Node;
 import sqlancer.noisepage.ast.NoisePageConstant;
 import sqlancer.noisepage.ast.NoisePageExpression;
-import sqlancer.noisepage.ast.NoisePageJoin;
+//import sqlancer.noisepage.ast.NoisePageJoin;
 import sqlancer.noisepage.ast.NoisePageSelect;
 
 public class NoisePageToStringVisitor extends NewToStringVisitor<NoisePageExpression> {
@@ -15,28 +15,30 @@ public class NoisePageToStringVisitor extends NewToStringVisitor<NoisePageExpres
             visit((NoisePageConstant) expr);
         } else if (expr instanceof NoisePageSelect) {
             visit((NoisePageSelect) expr);
-        } else if (expr instanceof NoisePageJoin) {
-            visit((NoisePageJoin) expr);
-        } else {
+        }
+//        else if (expr instanceof NoisePageJoin) {
+//            visit((NoisePageJoin) expr);
+//        }
+        else {
             throw new AssertionError(expr.getClass());
         }
     }
 
-    private void visit(NoisePageJoin join) {
-        visit(join.getLeftTable());
-        sb.append(" ");
-        sb.append(join.getJoinType());
-        sb.append(" ");
-        if (join.getOuterType() != null) {
-            sb.append(join.getOuterType());
-        }
-        sb.append(" JOIN ");
-        visit(join.getRightTable());
-        if (join.getOnCondition() != null) {
-            sb.append(" ON ");
-            visit(join.getOnCondition());
-        }
-    }
+//    private void visit(NoisePageJoin join) {
+//        visit(join.getLeftTable());
+//        sb.append(" ");
+//        sb.append(join.getJoinType());
+//        sb.append(" ");
+//        if (join.getOuterType() != null) {
+//            sb.append(join.getOuterType());
+//        }
+//        sb.append(" JOIN ");
+//        visit(join.getRightTable());
+//        if (join.getOnCondition() != null) {
+//            sb.append(" ON ");
+//            visit(join.getOnCondition());
+//        }
+//    }
 
     private void visit(NoisePageConstant constant) {
         sb.append(constant.toString());
@@ -84,7 +86,9 @@ public class NoisePageToStringVisitor extends NewToStringVisitor<NoisePageExpres
 
     public static String asString(Node<NoisePageExpression> expr) {
         NoisePageToStringVisitor visitor = new NoisePageToStringVisitor();
+        System.out.println("String visitor expr: "+expr.toString());
         visitor.visit(expr);
+        System.out.println("String visitor expr: "+visitor.get());
         return visitor.get();
     }
 

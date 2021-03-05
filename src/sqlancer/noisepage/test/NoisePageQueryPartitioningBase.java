@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sqlancer.Randomly;
-import sqlancer.TernaryLogicPartitioningOracleBase;
-import sqlancer.TestOracle;
-import sqlancer.ast.newast.ColumnReferenceNode;
-import sqlancer.ast.newast.Node;
-import sqlancer.ast.newast.TableReferenceNode;
+import sqlancer.common.ast.newast.ColumnReferenceNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.ast.newast.TableReferenceNode;
+import sqlancer.common.gen.ExpressionGenerator;
+import sqlancer.common.oracle.TernaryLogicPartitioningOracleBase;
+import sqlancer.common.oracle.TestOracle;
 import sqlancer.noisepage.NoisePageErrors;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
 import sqlancer.noisepage.NoisePageSchema;
@@ -18,10 +19,10 @@ import sqlancer.noisepage.NoisePageSchema.NoisePageColumn;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTables;
 import sqlancer.noisepage.ast.NoisePageExpression;
-import sqlancer.noisepage.ast.NoisePageJoin;
+//import sqlancer.noisepage.ast.NoisePageJoin;
 import sqlancer.noisepage.ast.NoisePageSelect;
 import sqlancer.noisepage.gen.NoisePageExpressionGenerator;
-import sqlancer.gen.ExpressionGenerator;
+
 
 public class NoisePageQueryPartitioningBase
         extends TernaryLogicPartitioningOracleBase<Node<NoisePageExpression>, NoisePageGlobalState> implements TestOracle {
@@ -47,8 +48,8 @@ public class NoisePageQueryPartitioningBase
         List<NoisePageTable> tables = targetTables.getTables();
         List<TableReferenceNode<NoisePageExpression, NoisePageTable>> tableList = tables.stream()
                 .map(t -> new TableReferenceNode<NoisePageExpression, NoisePageTable>(t)).collect(Collectors.toList());
-        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, state);
-        select.setJoinList(joins.stream().collect(Collectors.toList()));
+//        List<Node<NoisePageExpression>> joins = NoisePageJoin.getJoins(tableList, state);
+//        select.setJoinList(joins.stream().collect(Collectors.toList()));
         select.setFromList(tableList.stream().collect(Collectors.toList()));
         select.setWhereClause(null);
     }

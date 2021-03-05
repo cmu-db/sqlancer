@@ -6,26 +6,29 @@ import java.util.List;
 
 import sqlancer.IgnoreMeException;
 import sqlancer.Randomly;
-import sqlancer.ast.BinaryOperatorNode.Operator;
-import sqlancer.ast.newast.ColumnReferenceNode;
-import sqlancer.ast.newast.NewBetweenOperatorNode;
-import sqlancer.ast.newast.NewBinaryOperatorNode;
-import sqlancer.ast.newast.NewCaseOperatorNode;
-import sqlancer.ast.newast.NewFunctionNode;
-import sqlancer.ast.newast.NewInOperatorNode;
-import sqlancer.ast.newast.NewOrderingTerm;
-import sqlancer.ast.newast.NewOrderingTerm.Ordering;
-import sqlancer.ast.newast.NewTernaryNode;
-import sqlancer.ast.newast.NewUnaryPostfixOperatorNode;
-import sqlancer.ast.newast.NewUnaryPrefixOperatorNode;
-import sqlancer.ast.newast.Node;
+import sqlancer.common.ast.BinaryOperatorNode.Operator;
+import sqlancer.common.ast.newast.ColumnReferenceNode;
+import sqlancer.common.ast.newast.NewBetweenOperatorNode;
+import sqlancer.common.ast.newast.NewBinaryOperatorNode;
+import sqlancer.common.ast.newast.NewCaseOperatorNode;
+import sqlancer.common.ast.newast.NewFunctionNode;
+import sqlancer.common.ast.newast.NewInOperatorNode;
+import sqlancer.common.ast.newast.NewOrderingTerm;
+import sqlancer.common.ast.newast.NewOrderingTerm.Ordering;
+import sqlancer.common.ast.newast.NewTernaryNode;
+import sqlancer.common.ast.newast.NewUnaryPostfixOperatorNode;
+import sqlancer.common.ast.newast.NewUnaryPrefixOperatorNode;
+import sqlancer.common.ast.newast.Node;
+import sqlancer.common.gen.UntypedExpressionGenerator;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
+import sqlancer.noisepage.NoisePageSchema;
 import sqlancer.noisepage.NoisePageSchema.NoisePageColumn;
 import sqlancer.noisepage.NoisePageSchema.NoisePageCompositeDataType;
 import sqlancer.noisepage.NoisePageSchema.NoisePageDataType;
 import sqlancer.noisepage.ast.NoisePageConstant;
 import sqlancer.noisepage.ast.NoisePageExpression;
-import sqlancer.gen.UntypedExpressionGenerator;
+
+import static java.lang.Math.abs;
 
 public final class NoisePageExpressionGenerator extends UntypedExpressionGenerator<Node<NoisePageExpression>, NoisePageColumn> {
 
@@ -130,6 +133,7 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
     @Override
     public Node<NoisePageExpression> generateConstant() {
         if (Randomly.getBooleanWithSmallProbability()) {
+//            System.out.println("Create null constant");
             return NoisePageConstant.createNullConstant();
         }
         NoisePageDataType type = NoisePageDataType.getRandom();
@@ -169,6 +173,65 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
         }
     }
 
+    public Node<NoisePageExpression> generateConstant(NoisePageCompositeDataType curType) {
+
+        if (Randomly.getBooleanWithSmallProbability()) {
+            System.out.println("Create null constant");
+            return NoisePageConstant.createNullConstant();
+        }
+
+//        NoisePageDataType type = NoisePageDataType.getRandom();
+        NoisePageDataType type = curType.getType();
+        System.out.println("Expression Generator: "+type.toString()+type.name());
+        System.out.println("Expression Generator: "+curType.toString());
+        switch (type) {
+            case INT:
+                System.out.println("Expression Generator: "+curType.toString()+curType.getSize());
+                if (!globalState.getDmbsSpecificOptions().testIntConstants) {
+                    throw new IgnoreMeException();
+                }
+                if(curType.getSize()==1){
+                    int temp = (int) (abs(globalState.getRandomly().getInteger())%255-128);
+                    return NoisePageConstant.createIntConstant(temp);
+                }else if (curType.getSize()==2){
+                    int temp = (int) (abs(globalState.getRandomly().getInteger())%65536-32768);
+                    return NoisePageConstant.createIntConstant(temp);
+                }else if(curType.getSize()==4){
+                    return NoisePageConstant.createIntConstant(globalState.getRandomly().getInteger());
+                }else{
+                    return NoisePageConstant.createIntConstant(globalState.getRandomly().getInteger());
+                }
+//                System.out.println(NoisePageConstant.createIntConstant(globalState.getRandomly().getInteger()));
+            case DATE:
+                if (!globalState.getDmbsSpecificOptions().testDateConstants) {
+                    throw new IgnoreMeException();
+                }
+                return NoisePageConstant.createDateConstant(globalState.getRandomly().getInteger());
+            case TIMESTAMP:
+                if (!globalState.getDmbsSpecificOptions().testTimestampConstants) {
+                    throw new IgnoreMeException();
+                }
+                return NoisePageConstant.createTimestampConstant(globalState.getRandomly().getInteger());
+            case VARCHAR:
+                if (!globalState.getDmbsSpecificOptions().testStringConstants) {
+                    throw new IgnoreMeException();
+                }
+                return NoisePageConstant.createStringConstant(globalState.getRandomly().getString());
+            case BOOLEAN:
+                if (!globalState.getDmbsSpecificOptions().testBooleanConstants) {
+                    throw new IgnoreMeException();
+                }
+                return NoisePageConstant.createBooleanConstant(Randomly.getBoolean());
+            case FLOAT:
+                if (!globalState.getDmbsSpecificOptions().testFloatConstants) {
+                    throw new IgnoreMeException();
+                }
+                return NoisePageConstant.createFloatConstant(globalState.getRandomly().getDouble());
+            default:
+                throw new AssertionError();
+        }
+    }
+
     @Override
     public List<Node<NoisePageExpression>> generateOrderBys() {
         List<Node<NoisePageExpression>> expr = super.generateOrderBys();
@@ -197,8 +260,11 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
     }
 
     public enum NoisePageAggregateFunction {
-        MAX(1), MIN(1), AVG(1), COUNT(1), STRING_AGG(1), FIRST(1), SUM(1), STDDEV_SAMP(1), STDDEV_POP(1), VAR_POP(1),
-        VAR_SAMP(1), COVAR_POP(1), COVAR_SAMP(1);
+        MAX(1), MIN(1), AVG(1), COUNT(1),
+//        STRING_AGG(1),
+        FIRST(1), SUM(1);
+//        STDDEV_SAMP(1), STDDEV_POP(1), VAR_POP(1),
+//        VAR_SAMP(1), COVAR_POP(1), COVAR_SAMP(1);
 
         private int nrArgs;
 
@@ -229,19 +295,19 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
         // math functions
         ABS(1), //
         CEIL(1), //
-        CEILING(1), //
+//        CEILING(1), //
         FLOOR(1), //
-        LOG(1), //
+//        LOG(1), //
         LOG10(1), LOG2(1), //
-        LN(1), //
-        PI(0), //
+//        LN(1), //
+//        PI(0), //
         SQRT(1), //
         POWER(1), //
         CBRT(1), //
         ROUND(2), //
-        SIGN(1), //
-        DEGREES(1), //
-        RADIANS(1), //
+//        SIGN(1), //
+//        DEGREES(1), //
+//        RADIANS(1), //
         MOD(2), //
         // string functions
         LENGTH(1), //
@@ -250,17 +316,16 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
         SUBSTRING(3), //
         REVERSE(1), //
         CONCAT(1, true), //
-        CONCAT_WS(1, true), CONTAINS(2), //
+//        CONCAT_WS(1, true), CONTAINS(2), //
         PREFIX(2), //
         SUFFIX(2), //
         INSTR(2), //
         PRINTF(1, true), //
-        REGEXP_MATCHES(2), //
-        REGEXP_REPLACE(3), //
+//        REGEXP_MATCHES(2), //
+//        REGEXP_REPLACE(3), //
         STRIP_ACCENTS(1), //
-
         // date functions
-        DATE_PART(2), AGE(2),
+//        DATE_PART(2), AGE(2),
 
         COALESCE(3), NULLIF(2),
 
@@ -269,10 +334,14 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
         LTRIM(1), RTRIM(1),
         // LEFT(2), https://github.com/cwida/noisepage/issues/633
         // REPEAT(2),
-        REPLACE(3), UNICODE(1),
+//        REPLACE(3),
+        UNICODE(1),
 
-        BIT_COUNT(1), BIT_LENGTH(1), LAST_DAY(1), MONTHNAME(1), DAYNAME(1), YEARWEEK(1), DAYOFMONTH(1), WEEKDAY(1),
-        WEEKOFYEAR(1),
+//        BIT_COUNT(1), BIT_LENGTH(1),
+//        LAST_DAY(1),
+//        MONTHNAME(1), DAYNAME(1), YEARWEEK(1),
+//        DAYOFMONTH(1), WEEKDAY(1),
+//        WEEKOFYEAR(1),
 
         IFNULL(2), IF(3);
 
@@ -379,8 +448,9 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
     }
 
     public enum NoisePageBinaryArithmeticOperator implements Operator {
-        CONCAT("||"), ADD("+"), SUB("-"), MULT("*"), DIV("/"), MOD("%"), AND("&"), OR("|"), XOR("#"), LSHIFT("<<"),
-        RSHIFT(">>");
+        CONCAT("||"), ADD("+"), SUB("-"), MULT("*"), DIV("/"), MOD("%");
+//        AND("&"), OR("|"), XOR("#"), LSHIFT("<<"),
+//        RSHIFT(">>");
 
         private String textRepr;
 
