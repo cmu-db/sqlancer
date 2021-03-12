@@ -1,9 +1,6 @@
 package sqlancer.noisepage.gen;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import sqlancer.Randomly;
 import sqlancer.common.ast.newast.Node;
 import sqlancer.common.query.ExpectedErrors;
@@ -21,6 +18,7 @@ public final class NoisePageIndexGenerator {
     private NoisePageIndexGenerator() {
     }
 
+    // TODO: investigate create index failure
     public static SQLQueryAdapter getQuery(NoisePageGlobalState globalState) {
         ExpectedErrors errors = new ExpectedErrors();
         StringBuilder sb = new StringBuilder();

@@ -21,7 +21,6 @@ import sqlancer.common.ast.newast.NewUnaryPrefixOperatorNode;
 import sqlancer.common.ast.newast.Node;
 import sqlancer.common.gen.UntypedExpressionGenerator;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
-import sqlancer.noisepage.NoisePageSchema;
 import sqlancer.noisepage.NoisePageSchema.NoisePageColumn;
 import sqlancer.noisepage.NoisePageSchema.NoisePageCompositeDataType;
 import sqlancer.noisepage.NoisePageSchema.NoisePageDataType;
@@ -133,7 +132,6 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
     @Override
     public Node<NoisePageExpression> generateConstant() {
         if (Randomly.getBooleanWithSmallProbability()) {
-//            System.out.println("Create null constant");
             return NoisePageConstant.createNullConstant();
         }
         NoisePageDataType type = NoisePageDataType.getRandom();
@@ -176,22 +174,17 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
     public Node<NoisePageExpression> generateConstant(NoisePageCompositeDataType curType) {
 
         if (Randomly.getBooleanWithSmallProbability()) {
-            System.out.println("Create null constant");
             return NoisePageConstant.createNullConstant();
         }
 
-//        NoisePageDataType type = NoisePageDataType.getRandom();
         NoisePageDataType type = curType.getType();
-        System.out.println("Expression Generator: "+type.toString()+type.name());
-        System.out.println("Expression Generator: "+curType.toString());
         switch (type) {
             case INT:
-                System.out.println("Expression Generator: "+curType.toString()+curType.getSize());
                 if (!globalState.getDmbsSpecificOptions().testIntConstants) {
                     throw new IgnoreMeException();
                 }
                 if(curType.getSize()==1){
-                    int temp = (int) (abs(globalState.getRandomly().getInteger())%255-128);
+                    int temp = (int) (abs(globalState.getRandomly().getInteger())%256);
                     return NoisePageConstant.createIntConstant(temp);
                 }else if (curType.getSize()==2){
                     int temp = (int) (abs(globalState.getRandomly().getInteger())%65536-32768);
@@ -201,7 +194,6 @@ public final class NoisePageExpressionGenerator extends UntypedExpressionGenerat
                 }else{
                     return NoisePageConstant.createIntConstant(globalState.getRandomly().getInteger());
                 }
-//                System.out.println(NoisePageConstant.createIntConstant(globalState.getRandomly().getInteger()));
             case DATE:
                 if (!globalState.getDmbsSpecificOptions().testDateConstants) {
                     throw new IgnoreMeException();

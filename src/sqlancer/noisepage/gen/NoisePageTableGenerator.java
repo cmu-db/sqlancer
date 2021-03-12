@@ -3,23 +3,16 @@ package sqlancer.noisepage.gen;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import sqlancer.Randomly;
 import sqlancer.common.ast.newast.Node;
 import sqlancer.common.gen.UntypedExpressionGenerator;
 import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 
-import sqlancer.noisepage.NoisePageErrors;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
-import sqlancer.noisepage.NoisePageSchema;
 import sqlancer.noisepage.NoisePageSchema.NoisePageColumn;
 import sqlancer.noisepage.NoisePageSchema.NoisePageCompositeDataType;
-import sqlancer.noisepage.NoisePageSchema.NoisePageDataType;
 import sqlancer.noisepage.NoisePageToStringVisitor;
 import sqlancer.noisepage.ast.NoisePageExpression;
 
@@ -81,8 +74,6 @@ public class NoisePageTableGenerator {
 //            sb.append(")");
 //        }
         sb.append(")");
-//        System.out.println("print out sb");
-//        System.out.println(sb.toString());
         return new SQLQueryAdapter(sb.toString(), errors, true);
     }
 
@@ -95,7 +86,6 @@ public class NoisePageTableGenerator {
         for (int i = 0; i < Randomly.smallNumber() + 1; i++) {
             String columnName = String.format("c%d", i);
             NoisePageCompositeDataType columnType = NoisePageCompositeDataType.getRandom();
-            System.out.println("Get new columns: "+columnName + columnType);
             // TODO: deal with primary key
             columns.add(new NoisePageColumn(columnName, columnType, false, false));
         }

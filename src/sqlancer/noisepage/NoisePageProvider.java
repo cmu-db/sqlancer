@@ -11,7 +11,6 @@ import sqlancer.SQLConnection;
 import sqlancer.SQLGlobalState;
 import sqlancer.SQLProviderAdapter;
 import sqlancer.StatementExecutor;
-import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
 import sqlancer.common.query.SQLQueryProvider;
 
@@ -100,16 +99,13 @@ public class NoisePageProvider extends SQLProviderAdapter<NoisePageGlobalState, 
         for (int i = 0; i < Randomly.fromOptions(1, 2); i++) {
             boolean success = false;
             do {
-//                System.out.println("enter");
                 SQLQueryAdapter qt = new NoisePageTableGenerator().getQuery(globalState);
                 success = globalState.executeStatement(qt);
                 if(success){
-                    System.out.println(qt.getQueryString()+" query string generate database");
+                    System.out.println(qt.getQueryString()+" generateDatabase create table");
                 }
             } while (!success);
         }
-//        System.out.println(globalState.getSchema().getDatabaseTables());
-        System.out.println("hahaha");
         if (globalState.getSchema().getDatabaseTables().isEmpty()) {
             throw new IgnoreMeException(); // TODO
         }
@@ -119,27 +115,11 @@ public class NoisePageProvider extends SQLProviderAdapter<NoisePageGlobalState, 
                         throw new IgnoreMeException();
                     }
                 });
-        System.out.println("hahaha2");
         se.executeStatements();
     }
 
-//    @Override
-//    protected TestOracle getTestOracle(NoisePageGlobalState globalState) throws SQLException {
-//        return new CompositeTestOracle(globalState.getDmbsSpecificOptions().oracle.stream().map(o -> {
-//            try {
-//                return o.create(globalState);
-//            } catch (SQLException e1) {
-//                throw new AssertionError(e1);
-//            }
-//        }).collect(Collectors.toList()));
-//    }
-
     @Override
     public SQLConnection createDatabase(NoisePageGlobalState globalState) throws SQLException {
-//        String url = "jdbc:postgresql://localhost:15721/";
-//        // use host names, url is wrong
-//        return DriverManager.getConnection(url, globalState.getOptions().getUserName(),
-//                globalState.getOptions().getPassword());
         return makeDefaultConnection();
     }
 

@@ -2,12 +2,8 @@ package sqlancer.noisepage.gen;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import sqlancer.Randomly;
 import sqlancer.common.gen.AbstractInsertGenerator;
 import sqlancer.common.query.ExpectedErrors;
 import sqlancer.common.query.SQLQueryAdapter;
@@ -37,7 +33,6 @@ public class NoisePageInsertGenerator extends AbstractInsertGenerator<NoisePageC
         List<NoisePageColumn> temp = NoisePageSchema.getTableColumns(globalState.getConnection()
                 , table.getName());
         List<NoisePageColumn> columns = new ArrayList<>();
-        System.out.println("insert generator: "+temp.size());
         for(NoisePageColumn c: temp){
             double ran = Math.random();
             if (ran<0.5){
@@ -47,21 +42,14 @@ public class NoisePageInsertGenerator extends AbstractInsertGenerator<NoisePageC
         if (columns.size()==0){
             columns.add(temp.get(0));
         }
-//        List<NoisePageColumn> columns = table.getRandomNonEmptyColumnSubset();
-        for(NoisePageColumn c:columns){
-            System.out.println("InsertGenerator columns: "+table.getName());
-            System.out.println("InsertGenerator columns: "+c.getName());
-            System.out.println("InsertGenerator columns: "+c.getType());
-        }
         sb.append(table.getName());
         sb.append("(");
         sb.append(columns.stream().map(c -> c.getName()).collect(Collectors.joining(", ")));
         sb.append(")");
         sb.append(" VALUES ");
-        System.out.println("InsertGenerator: "+sb.toString());
         insertColumns(columns);
-        System.out.println("InsertGenerator: "+sb.toString());
         NoisePageErrors.addInsertErrors(errors);
+        System.out.println("Insert statement: " + sb.toString());
         return new SQLQueryAdapter(sb.toString(), errors);
     }
 
@@ -69,7 +57,7 @@ public class NoisePageInsertGenerator extends AbstractInsertGenerator<NoisePageC
     @Override
     protected void insertValue(NoisePageColumn tiDBColumn) {
         // TODO: select a more meaningful value
-        System.out.println("Insert Generator tiDBColumn: "+tiDBColumn.getName()+tiDBColumn.getType().toString());
+        // disabled default
         sb.append(NoisePageToStringVisitor.asString(new NoisePageExpressionGenerator(globalState).generateConstant(tiDBColumn.getType())));
 //        if (Randomly.getBooleanWithRatherLowProbability()) {
 //            sb.append("DEFAULT");

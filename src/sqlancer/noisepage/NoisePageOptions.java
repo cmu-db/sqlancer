@@ -29,7 +29,6 @@ public class NoisePageOptions implements DBMSSpecificOptions<NoisePageOracleFact
 
     @Parameter(names = "--test-check", description = "Allow generating CHECK constraints in tables", arity = 1)
     public boolean testCheckConstraints = false;
-//    public boolean testCheckConstraints = true;
 
     @Parameter(names = "--test-default-values", description = "Allow generating DEFAULT values in tables", arity = 1)
     public boolean testDefaultValues = true;
@@ -42,7 +41,6 @@ public class NoisePageOptions implements DBMSSpecificOptions<NoisePageOracleFact
 
     @Parameter(names = "--test-casts", description = "Allow generating casts in expressions", arity = 1)
     public boolean testCasts = false;
-//    public boolean testCasts = true;
 
     @Parameter(names = "--test-between", description = "Allow generating the BETWEEN operator in expressions", arity = 1)
     public boolean testBetween = false;

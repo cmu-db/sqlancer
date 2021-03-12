@@ -86,9 +86,7 @@ public class NoisePageToStringVisitor extends NewToStringVisitor<NoisePageExpres
 
     public static String asString(Node<NoisePageExpression> expr) {
         NoisePageToStringVisitor visitor = new NoisePageToStringVisitor();
-        System.out.println("String visitor expr: "+expr.toString());
         visitor.visit(expr);
-        System.out.println("String visitor expr: "+visitor.get());
         return visitor.get();
     }
 

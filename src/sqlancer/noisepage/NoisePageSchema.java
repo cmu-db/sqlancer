@@ -7,14 +7,12 @@ import java.util.stream.Collectors;
 import sqlancer.Randomly;
 import sqlancer.SQLConnection;
 import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
-import sqlancer.postgres.PostgresSchema;
 import sqlancer.common.schema.AbstractRelationalTable;
 import sqlancer.common.schema.AbstractSchema;
 import sqlancer.common.schema.AbstractTableColumn;
 import sqlancer.common.schema.AbstractTables;
 import sqlancer.common.schema.TableIndex;
 import sqlancer.noisepage.NoisePageProvider.NoisePageGlobalState;
-import sqlancer.noisepage.NoisePageSchema.NoisePageTable;
 
 public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoisePageTable> {
 
@@ -104,7 +102,6 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
                 case 2:
                     return Randomly.fromOptions("SMALLINT", "INT2");
                 case 1:
-//                    return Randomly.fromOptions("TINYINT", "INT1");
                     return "TINYINT";
                 default:
                     throw new AssertionError(size);
@@ -113,10 +110,6 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
                 return "VARCHAR";
             case FLOAT:
                 switch (size) {
-//                case 8:
-//                    return Randomly.fromOptions("DOUBLE", "NUMERIC");
-//                case 4:
-//                    return Randomly.fromOptions("REAL", "FLOAT4");
                 case 8:
                     return Randomly.fromOptions("REAL");
                 case 16:
@@ -127,11 +120,9 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
             case BOOLEAN:
                 return Randomly.fromOptions("BOOLEAN", "BOOL");
             case TIMESTAMP:
-//                return Randomly.fromOptions("TIMESTAMP", "DATETIME");
-                return "TIMESTAMP";
+                return Randomly.fromOptions("TIMESTAMP");
             case DATE:
-//                return Randomly.fromOptions("DATE");
-                return "DATE";
+                return Randomly.fromOptions("DATE");
             default:
                 throw new AssertionError(getPrimitiveDataType());
             }
@@ -266,7 +257,6 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
     public static NoisePageSchema fromConnection(SQLConnection con, String databaseName) throws SQLException {
         List<NoisePageTable> databaseTables = new ArrayList<>();
         List<String> tableNames = getTableNames(con);
-        System.out.println("From connection table names: "+tableNames);
         for (String tableName : tableNames) {
             List<NoisePageColumn> databaseColumns = getTableColumns(con, tableName);
             boolean isView = tableName.startsWith("v");
@@ -276,10 +266,6 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
             }
             databaseTables.add(t);
         }
-//        for(NoisePageTable i:databaseTables){
-//            System.out.println(i.getName());
-//            System.out.println("here");
-//        }
         return new NoisePageSchema(databaseTables);
     }
 
@@ -316,11 +302,8 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
             System.out.println("Create statement failed for getting random value");
         }
         Random rand = new Random();
-        System.out.println("Get random column value: "+ values.size());
-        System.out.println("Get random column value: "+ col.getType().toString());
-        System.out.println("Get random column value: "+ col.getType().getType());
         if(values.size()==0){
-            return "";
+            return null;
         }
         if(col.getType().getType()==NoisePageDataType.VARCHAR||col.getType().getType()==NoisePageDataType.TIMESTAMP
         ||col.getType().getType()==NoisePageDataType.DATE){
@@ -356,11 +339,8 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
         List<NoisePageColumn> columns = new ArrayList<>();
         try (Statement s = con.createStatement()) {
             String sql = String.format("SELECT attname, atttypid FROM pg_attribute JOIN pg_class ON attrelid = reloid WHERE relname = '%s';",tableName);
-//            System.out.println(sql);
             try (ResultSet rs = s.executeQuery(sql)) {
                 List<String> colNames = processResults(rs);
-//                System.out.println("COLTYPENAME");
-//                System.out.println(colNames);
                 // get primary key
                 for(int i=0;i<colNames.size();i+=2){
 //                    boolean isNullable = rs.getString("notnull").contentEquals("false");
@@ -382,10 +362,6 @@ public class NoisePageSchema extends AbstractSchema<NoisePageGlobalState, NoiseP
 //            // https://github.com/cwida/noisepage/issues/588
 //            // TODO: implement an option to enable/disable rowids
 //            columns.add(new NoisePageColumn("rowid", new NoisePageCompositeDataType(NoisePageDataType.INT, 4), false, false));
-//        }
-//        System.out.println("Get table columns: "+tableName);
-//        for(NoisePageColumn i:columns){
-//            System.out.println("Get table columns: "+i.getType()+i.getName());
 //        }
 
         return columns;

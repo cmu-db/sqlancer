@@ -2,8 +2,6 @@ package sqlancer.noisepage;
 
 import sqlancer.common.query.ExpectedErrors;
 
-import java.util.Set;
-
 public final class NoisePageErrors {
 
     private NoisePageErrors() {
